@@ -44,6 +44,9 @@ public:
   void refreshTimeLabel();
   void setTime(String time){lv_label_set_text(timeLabel, time.c_str());}
 
+  void closeConfigDialog();
+  void showConfigDialog();
+
   std::vector<std::shared_ptr<Message> > messages;
 
 private:
@@ -52,6 +55,7 @@ private:
   lv_obj_t *mainScreen;
   RoomWidget *roomWidgets[10];
   SetPointDialog *spDialog;
+  lv_obj_t *configDialog;
 
   lv_timer_t *backlightTimer;
   lv_timer_t *messageTimer;

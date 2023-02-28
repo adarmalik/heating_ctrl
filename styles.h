@@ -8,7 +8,7 @@ private:
   Styles(){
     lv_style_init(&RoomWidgetBaseStyle);
 
-    lv_style_set_shadow_width(&RoomWidgetBaseStyle, 10);
+    lv_style_set_shadow_width(&RoomWidgetBaseStyle, 5);
     lv_style_set_shadow_spread(&RoomWidgetBaseStyle, 5);
     lv_style_set_shadow_color(&RoomWidgetBaseStyle, lv_palette_darken(LV_PALETTE_GREY, 4));
     lv_style_set_text_font(&RoomWidgetBaseStyle, &lv_font_montserrat_28);

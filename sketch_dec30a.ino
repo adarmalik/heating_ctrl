@@ -11,6 +11,21 @@ std::map<String, Subscriber*> subscriptions;
 WiFiClient client;
 PubSubClient mqttClient(client);
 
+void print_wakeup_reason(){
+  esp_sleep_wakeup_cause_t wakeup_reason;
+
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  switch(wakeup_reason){
+    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
+    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
+    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
+    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
+    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
+  }
+}
+
 void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info){
   Serial.println("Connected to AP successfully!");
 }
@@ -102,13 +117,20 @@ void setup(){
 
   Serial.begin(115200);
   while (!Serial);
-   
+     
   mqttClient.setServer(MQTT_HOST, MQTT_PORT);
   mqttClient.setCallback(onMqttMessage);
   
-  if(!init_screen()){
+  // sorry for that terrible hack
+  // my 5" device has MAC ending with 0x74, 
+  // the 4.3" device has a smaller touchscreen resolution
+  unsigned char mac[6];
+  WiFi.macAddress(mac);
+  bool small_screen = (mac[5] != 116);
+  
+  if(!init_screen(small_screen)){
     Serial.println("Panic");
-    delay(30000);
+    delay(3000);
     ESP.restart();
   }
 
@@ -151,6 +173,7 @@ void loop(){
     UI::getInstance().mqttConnected(false);
     counter += UI::getInstance().getRefreshTime();
     if(counter > 5000){
+      counter = 0;
       connectToMqtt();
     }
   }

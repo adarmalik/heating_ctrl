@@ -38,40 +38,51 @@ Arduino_ESP32RGBPanel *bus = new Arduino_ESP32RGBPanel(
 #define TOUCH_GT911_INT -1
 #define TOUCH_GT911_RST 38
 #define TOUCH_GT911_ROTATION ROTATION_NORMAL
-#define TOUCH_MAP_X1 480
+//#define TOUCH_MAP_X1 800
+//#define TOUCH_MAP_X1 480
 #define TOUCH_MAP_X2 0
-#define TOUCH_MAP_Y1 272
+//#define TOUCH_MAP_Y1 480
+//#define TOUCH_MAP_Y1 272
 #define TOUCH_MAP_Y2 0
 
-TAMC_GT911 ts = TAMC_GT911(TOUCH_GT911_SDA, TOUCH_GT911_SCL, TOUCH_GT911_INT,
-                           TOUCH_GT911_RST, max(TOUCH_MAP_X1, TOUCH_MAP_X2),
-                           max(TOUCH_MAP_Y1, TOUCH_MAP_Y2));
+
+TAMC_GT911 *ts = NULL;
 
 uint16_t touch_last_x = 0;
 uint16_t touch_last_y = 0;
 
+int touch_map_x1 = 0;
+int touch_map_y1 = 0;
+
 bool touch_has_signal() { return true; }
 bool touch_released() { return true; }
 
-void touch_init() {
+void touch_init(bool small) {
+  touch_map_x1 = small ? 480 : 800;
+  touch_map_y1 = small ? 272 : 480;
+
+
+  ts = new TAMC_GT911(TOUCH_GT911_SDA, TOUCH_GT911_SCL, TOUCH_GT911_INT,
+                           TOUCH_GT911_RST, max(touch_map_x1, TOUCH_MAP_X2),
+                           max(TOUCH_MAP_Y2, touch_map_y1));
   Wire.begin(TOUCH_GT911_SDA, TOUCH_GT911_SCL);
-  ts.begin();
-  ts.setRotation(TOUCH_GT911_ROTATION);
+  ts->begin();
+  ts->setRotation(TOUCH_GT911_ROTATION);
 }
 
 bool touch_touched() {
-  ts.read();
-  if (ts.isTouched) {
+  ts->read();
+  if (ts->isTouched) {
 #if defined(TOUCH_SWAP_XY)
     touch_last_x =
-        map(ts.points[0].y, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, gfx->width() - 1);
+        map(ts->points[0].y, touch_map_x1, TOUCH_MAP_X2, 0, gfx->width() - 1);
     touch_last_y =
-        map(ts.points[0].x, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, gfx->height() - 1);
+        map(ts->points[0].x, touch_map_y1, TOUCH_MAP_Y2, 0, gfx->height() - 1);
 #else
     touch_last_x =
-        map(ts.points[0].x, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, gfx->width() - 1);
+        map(ts->points[0].x, touch_map_x1, TOUCH_MAP_X2, 0, gfx->width() - 1);
     touch_last_y =
-        map(ts.points[0].y, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, gfx->height() - 1);
+        map(ts->points[0].y, touch_map_y1, TOUCH_MAP_Y2, 0, gfx->height() - 1);
 #endif
     return true;
   } else {
@@ -108,7 +119,7 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
   }
 }
 
-bool init_screen(){
+bool init_screen(bool small_screen){
   bool rc = false;
 
   // Init Display
@@ -119,7 +130,7 @@ bool init_screen(){
 
   lv_init();
   delay(10);
-  touch_init();
+  touch_init(small_screen);
   screenWidth = gfx->width();
   screenHeight = gfx->height();
 

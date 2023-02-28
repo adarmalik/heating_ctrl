@@ -9,4 +9,7 @@
 #define DRSSTATE "/STATE"
 #define PV "/~pv"
 
+#define NTP_SERVER "de.pool.ntp.org"
+#define TZ_INFO "WEST-1DWEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00" // Western European Time
+
 #define BACKLIGHT_SWITCHOFF_TIME_SEC (60 * 1000)
