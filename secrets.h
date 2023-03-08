@@ -1,1 +1,1 @@
-// replace next lines with actual configuration
+// create configuration from secret_template.h
