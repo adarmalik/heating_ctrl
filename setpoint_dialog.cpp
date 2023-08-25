@@ -42,9 +42,14 @@ static void set_point_button_event_handler(lv_event_t * e){
     Serial.println("set_point_button_event_handler");
     auto dlg = UI::getInstance().getSetPointDialog();
     auto ui = &(UI::getInstance());
-    ui->messages.push_back(std::shared_ptr<SetPointMessage>(new SetPointMessage(dlg->getCurrentWthId(), dlg->getCurrentSliderValue())));
-    ui->messages.push_back(std::shared_ptr<ProgramMessage>(new ProgramMessage(dlg->getCurrentWthId(), dlg->getCurrentProgramValue())));
-    ui->setMessageLed(true);
+    if(dlg->sliderValueHasChanged()){
+        ui->messages.push_back(std::shared_ptr<SetPointMessage>(new SetPointMessage(dlg->getCurrentWthId(), dlg->getCurrentSliderValue())));
+        ui->setMessageLed(true);
+    }
+    if(dlg->programValueHasChanged()){
+        ui->messages.push_back(std::shared_ptr<ProgramMessage>(new ProgramMessage(dlg->getCurrentWthId(), dlg->getCurrentProgramValue())));
+        ui->setMessageLed(true);
+    }
     ui->showMainScreen();
 }
 
@@ -136,6 +141,13 @@ const char* SetPointDialog::getCurrentWthId(){
     }
 }
 
+bool SetPointDialog::programValueHasChanged(){
+    return !(getCurrentProgramValue() == initiatlProgram);
+}
+
+bool SetPointDialog::sliderValueHasChanged(){
+    return !(getCurrentSliderValue() == initialTemp);
+}
 
 void SetPointDialog::setup(const char* name, const float value){
     lv_label_set_text(nameLabel, name);
@@ -144,6 +156,8 @@ void SetPointDialog::setup(const char* name, const float value){
 
 void SetPointDialog::setup(const char* name, const float temperatureValue, const uint8_t programValue){
     lv_label_set_text(nameLabel, name);
+    initialTemp = temperatureValue;
+    initiatlProgram = programValue;
     setValue(temperatureValue);
     setProgramValue(programValue);
 }

@@ -44,6 +44,8 @@ public:
   void setProgramValue(const uint8_t value);
   const uint8_t getCurrentProgramValue();
   float getCurrentSliderValue();
+  bool programValueHasChanged();
+  bool sliderValueHasChanged();
   const char* getCurrentWthId();
 
 private:
@@ -53,4 +55,6 @@ private:
   lv_obj_t *nameLabel;
   lv_obj_t *sliderLabel;
   RoomWidget *currentRoom;
+  float initialTemp;
+  uint8_t initiatlProgram;
 };
